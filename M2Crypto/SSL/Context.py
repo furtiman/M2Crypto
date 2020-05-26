@@ -99,6 +99,23 @@ class Context(object):
         m2.ssl_ctx_use_privkey(self.ctx, keyfile)
         if not m2.ssl_ctx_check_privkey(self.ctx):
             raise ValueError('public/private key mismatch')
+    
+    def load_cert_pkey(self, certfile, pkey,
+                  callback=util.passphrase_callback):
+        # type: (AnyStr, Optional[AnyStr], Callable) -> None
+        """Load certificate and private key into the context.
+
+        :param certfile: File that contains the PEM-encoded certificate.
+        :param keyfile:  'M2Crypto.EVP' object
+        :param callback: Callable object to be invoked if the private key is
+                         passphrase-protected. Default callback provides a
+                         simple terminal-style input for the passphrase.
+        """
+        m2.ssl_ctx_passphrase_callback(self.ctx, callback)
+        m2.ssl_ctx_use_cert(self.ctx, certfile)
+        m2.ssl_ctx_use_pkey_privkey(self.ctx, pkey)
+        if not m2.ssl_ctx_check_privkey(self.ctx):
+            raise ValueError('public/private key mismatch')
 
     def load_cert_chain(self, certchainfile, keyfile=None,
                         callback=util.passphrase_callback):
